@@ -25,7 +25,7 @@ class SherlockPublisher(publisher.PublisherBase):
         else:
             self.host = socket.gethostbyaddr(socket.gethostname())[0]
 
-    def send_post(post_url, msg):
+    def send_post(self, post_url, msg):
         headers = {'content-type': 'application/json', 'accept': 'application/json'}
         # get payload from msg
         payload = [{"key":"tagStart","value":{"c3CeilometerProjectId":msg['project_id']}},
