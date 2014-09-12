@@ -47,6 +47,8 @@ def _get_metadata_from_object(instance):
         # Image properties
         'image': instance.image,
         'image_ref': (instance.image['id'] if instance.image else None),
+         # MetaData properties
+         'raw_metadata': getattr(instance, 'metadata', {}),
     }
 
     # Images that come through the conductor API in the nova notifier
