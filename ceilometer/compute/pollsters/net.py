@@ -43,6 +43,7 @@ class _Base(plugin.ComputePollster):
         resource_metadata['instance_id'] = instance.id
         resource_metadata['instance_type'] = \
             instance.flavor['id'] if instance.flavor else None
+        resource_metadata['raw_metadata'] = getattr(instance, 'metadata', {})
 
         if vnic_data.fref is not None:
             rid = vnic_data.fref
