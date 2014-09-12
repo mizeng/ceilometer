@@ -28,14 +28,14 @@ class SherlockPublisher(publisher.PublisherBase):
     def send_post(self, post_url, msg):
         headers = {'content-type': 'application/json', 'accept': 'application/json'}
         # get payload from msg
-        payload = [{"key":"tagStart","value":{"c3CeilometerProjectId":msg['project_id']}},
-                    {"key":"tagStart","value":{"c3CeilometerUserId":msg['user_id']}},
-                        {"key":"tagStart","value":{"c3CeilometerMessageID":msg['message_id']}},
-                            {"key":"tagStart","value":{"c3CeilometerMessageSignature":msg['message_signature']}},
-                                {"key":"tagStart","value":{"c3CeilometerResourceId":msg['resource_id']}},
-                                    {"key":"tagStart","value":{"c3CeilometerResourceMatadata":msg['resource_metadata']}},
-                                        {"key":"tagStart","value":{"c3CeilometerCounterType":msg['counter_type']}},
-                                            {"key":"tagStart","value":{"c3CeilometerCounterUnit":msg['counter_unit']}},
+        payload = [{"key":"tagStart","value":{"projectId":msg['project_id']}},
+                    {"key":"tagStart","value":{"userId":msg['user_id']}},
+                        {"key":"tagStart","value":{"messageID":msg['message_id']}},
+                            {"key":"tagStart","value":{"messageSignature":msg['message_signature']}},
+                                {"key":"tagStart","value":{"resourceId":msg['resource_id']}},
+                                    {"key":"tagStart","value":{"resourceMatadata":msg['resource_metadata']}},
+                                        {"key":"tagStart","value":{"counterType":msg['counter_type']}},
+                                            {"key":"tagStart","value":{"counterUnit":msg['counter_unit']}},
                                                 {"key":msg['counter_name'],"value":msg['counter_volume']},
                                             {"key":"tagEnd","value":""},
                                         {"key":"tagEnd","value":""},
