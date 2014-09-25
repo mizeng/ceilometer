@@ -23,12 +23,14 @@ import requests
 import pymongo
 from ceilometer.openstack.common import log
 from ceilometer.openstack.common.gettextutils import _  # noqa
+from ceilometer.openstack.common import network_utils
 from ceilometer.storage import base
 from ceilometer.storage import models
 from ceilometer.storage import pymongo_base
 from datetime import datetime
 import time
 import json
+import six.moves.urllib.parse as urlparse
 
 
 LOG = log.getLogger(__name__)
@@ -89,12 +91,17 @@ class Connection(base.Connection):
     """
     CONNECTION_POOL = pymongo_base.ConnectionPool()
 
-    _GENESIS = datetime.datetime(year=2014, month=9, day=1, hour=12)
-    _APOCALYPSE = datetime.datetime(year=9999, month=12, day=31,
+    _GENESIS = datetime(year=2014, month=9, day=1, hour=12)
+    _APOCALYPSE = datetime(year=9999, month=12, day=31,
                                     hour=23, minute=59, second=59)
     def __init__(self, conf):
         """Sherlock Connection Initialization."""
+        # Since we are using pymongo, even though we are connecting to DB2
+        # we still have to make sure that the scheme which used to distinguish
+        # db2 driver from mongodb driver be replaced so that pymongo will not
+        # produce an exception on the scheme.
         url = conf.database.connection
+        url = url.replace('sherlock:', 'mongodb:', 1)
         self.conn = self.CONNECTION_POOL.connect(url)
 
         connection_options = pymongo.uri_parser.parse_uri(url)
