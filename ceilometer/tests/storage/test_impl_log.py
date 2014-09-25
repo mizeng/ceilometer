@@ -18,11 +18,15 @@
 """Tests for ceilometer/storage/impl_log.py
 """
 
+from __future__ import absolute_import
+
+import sqlalchemy
+# from ceilometer.openstack.common import test
+# from ceilometer.storage import impl_log
+
 import mock
 
-from ceilometer.openstack.common import test
-from ceilometer.storage import impl_log
-
+sql = sqlalchemy
 
 class ConnectionTest(test.BaseTestCase):
     def test_get_connection(self):
