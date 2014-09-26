@@ -32,3 +32,4 @@ sqlalchemy-migrate>=0.8.2,!=0.8.4
 stevedore>=0.14
 WebOb>=1.2.3
 WSME>=0.6
+pymongo

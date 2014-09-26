@@ -23,14 +23,12 @@ import requests
 import pymongo
 from ceilometer.openstack.common import log
 from ceilometer.openstack.common.gettextutils import _  # noqa
-from ceilometer.openstack.common import network_utils
 from ceilometer.storage import base
 from ceilometer.storage import models
 from ceilometer.storage import pymongo_base
 from datetime import datetime
 import time
 import json
-import six.moves.urllib.parse as urlparse
 
 
 LOG = log.getLogger(__name__)
