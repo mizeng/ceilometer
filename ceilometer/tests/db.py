@@ -29,6 +29,7 @@ from ceilometer.openstack.common.fixture import config
 import ceilometer.openstack.common.fixture.mockpatch as oslo_mock
 from ceilometer import storage
 from ceilometer.tests import base as test_base
+from oslo.config import cfg
 
 
 class TestBase(test_base.BaseTestCase):
@@ -60,6 +61,11 @@ class TestBase(test_base.BaseTestCase):
         # Set a default location for the pipeline config file so the
         # tests work even if ceilometer is not installed globally on
         # the system.
+        PIPELINE_OPTS = [
+            cfg.StrOpt('pipeline_cfg_file',
+                       default='pipeline config file')
+        ]
+        cfg.CONF.register_opts(PIPELINE_OPTS)
         self.CONF.set_override(
             'pipeline_cfg_file',
             self.path_get('etc/ceilometer/pipeline.yaml')

@@ -53,11 +53,6 @@ STORAGE_OPTS = [
 
 cfg.CONF.register_opts(STORAGE_OPTS, group='database')
 
-PIPELINE_OPTS = [
-    cfg.StrOpt('pipeline_cfg_file',
-               default='pipeline config file')
-]
-cfg.CONF.register_opts(PIPELINE_OPTS)
 
 cfg.CONF.import_opt('connection',
                     'ceilometer.openstack.common.db.sqlalchemy.session',
