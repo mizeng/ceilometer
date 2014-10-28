@@ -33,3 +33,4 @@ stevedore>=0.14
 WebOb>=1.2.3
 WSME>=0.6
 pymongo
+infra>=14.42.1
