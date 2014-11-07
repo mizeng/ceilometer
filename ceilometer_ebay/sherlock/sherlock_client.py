@@ -8,7 +8,6 @@ from oslo.config.cfg import ConfigOpts
 from oslo.config import cfg
 from ceilometer.openstack.common.gettextutils import _  # noqa
 from ceilometer.openstack.common import log
-from gevent.pool import Pool
 import infra
 import infra.async
 import infra.ll
