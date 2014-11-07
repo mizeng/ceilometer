@@ -12,7 +12,6 @@ from ceilometer import publisher
 from ceilometer.publisher import utils
 from ceilometer import sample
 from ceilometer.openstack.common import network_utils
-from gevent.pool import Pool
 
 
 LOG = log.getLogger(__name__)
@@ -53,7 +52,6 @@ class SherlockPublisher(publisher.PublisherBase):
                 self.log_level = int(params.get('log_level', [2])[0])
                 self.timeout = float(params.get('timeout', [30.0])[0])
                 self.thread_num = float(params.get('thread_num', [10])[0])
-                self.thread_pool = Pool(self.thread_num)
             except ValueError:
                 LOG.error(_(
                     "sherlock tenant, env,app_svc and profile's data type should be string. "
