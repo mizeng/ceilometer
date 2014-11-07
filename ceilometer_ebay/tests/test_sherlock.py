@@ -1,6 +1,5 @@
 __author__ = 'lzhijun'
 import datetime
-import time
 
 from ceilometer.openstack.common import test
 from ceilometer_ebay.publisher import sherlock
@@ -8,7 +7,6 @@ from ceilometer.openstack.common import network_utils
 from ceilometer import sample
 from ceilometer import publisher
 import infra
-import eventlet
 
 COUNTER_SOURCE = 'testsource'
 #eventlet.monkey_patch(socket=True, select=True, thread=True)
@@ -125,7 +123,6 @@ class TestSherlockPublisher(test.BaseTestCase):
         self.assertIsNot(publisher_2.get_frontier(), publisher_1.get_frontier())
         self.assertEqual(publisher_1.get_frontier(), publisher_1.get_frontier())
         self.assertEqual(publisher_2.get_frontier(), publisher_2.get_frontier())
-
 
     def test_sherlock_prod_with_single_instance(self):
         publisher = sherlock.SherlockPublisher(network_utils.urlsplit(

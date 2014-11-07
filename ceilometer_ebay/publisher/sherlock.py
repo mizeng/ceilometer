@@ -2,6 +2,8 @@ __author__ = 'lzhijun'
 
 import urlparse
 import socket
+import subprocess
+import json
 
 from oslo.config import cfg
 from ceilometer.openstack.common.gettextutils import _  # noqa
@@ -10,11 +12,11 @@ from ceilometer import publisher
 from ceilometer.publisher import utils
 from ceilometer import sample
 from ceilometer.openstack.common import network_utils
-
-
 from gevent.pool import Pool
 
+
 LOG = log.getLogger(__name__)
+
 
 class SherlockPublisher(publisher.PublisherBase):
     """
@@ -50,7 +52,6 @@ class SherlockPublisher(publisher.PublisherBase):
                 self.maxsize = int(params.get('maxsize', [10000])[0])
                 self.log_level = int(params.get('log_level', [2])[0])
                 self.timeout = float(params.get('timeout', [30.0])[0])
-                self.sherlock_session_check_interval = float(params.get('sherlock_session_check_interval', [0.5])[0])
                 self.thread_num = float(params.get('thread_num', [10])[0])
                 self.thread_pool = Pool(self.thread_num)
             except ValueError:
@@ -74,6 +75,7 @@ class SherlockPublisher(publisher.PublisherBase):
     @staticmethod
     def extract_metrics(msg):
         from infra.contrib.frontier import GAUGE, COUNTER
+
         metrics_name = msg['counter_name']
         metrics_value = msg['counter_volume']
         metrics_type = msg['counter_type']
@@ -95,20 +97,20 @@ class SherlockPublisher(publisher.PublisherBase):
         return dimension_dict, metrics_list
 
     def get_frontier(self):
-            import infra
-            import infra.ll
-            import infra.contrib.frontier
+        import infra
+        import infra.ll
+        import infra.contrib.frontier
 
-            if self.frontier is None:
-                infra.ll.set_log_level(self.log_level)
-                self.frontier = infra.contrib.frontier.Frontier(host=self.host, port=self.port,
-                                                       tenant=self.tenant,
-                                                       env=self.env,
-                                                       app_svc=self.app_svc,
-                                                       profile=self.profile, maxsize=self.maxsize,
-                                                       timeout=self.timeout)
-                LOG.info(_("finish to initialize sherlock publisher"))
-            return self.frontier
+        if self.frontier is None:
+            infra.ll.set_log_level(self.log_level)
+            self.frontier = infra.contrib.frontier.Frontier(host=self.host, port=self.port,
+                                                            tenant=self.tenant,
+                                                            env=self.env,
+                                                            app_svc=self.app_svc,
+                                                            profile=self.profile, maxsize=self.maxsize,
+                                                            timeout=self.timeout)
+            LOG.info(_("finish to initialize sherlock publisher"))
+        return self.frontier
 
     def publish_samples(self, context, samples):
         """Send a metering message for publishing
@@ -116,6 +118,7 @@ class SherlockPublisher(publisher.PublisherBase):
         :param context: Execution context from the service or RPC call
         :param samples: Samples from pipeline after transformation
         """
+
         def _send_sherlock_metrics(sherlock_event):
             status = True
             frontier = self.get_frontier()
@@ -138,12 +141,8 @@ class SherlockPublisher(publisher.PublisherBase):
             if metric_list and len(metric_list) > 0:
                 sherlock_event_list.append({'msg': msg, 'dimension_list': dimension_list, 'metric_list': metric_list})
         if len(sherlock_event_list) > 0:
-            for status, message in self.thread_pool.imap_unordered(_send_sherlock_metrics, sherlock_event_list):
-                if status:
-                    LOG.info(_(
-                        "succeed publishing sample message over sherlock. details: [message: %(msg)s tenant: %(tenant)s env: %(env)s  ] ") % {
-                                 'msg': message, 'tenant': self.tenant, 'env': self.env})
-                else:
-                    LOG.info(_(
-                        "failed to publish sample message over sherlock. details: [message: %(msg)s tenant: %(tenant)s env: %(env)s  ] ") % {
-                                 'msg': message, 'tenant': self.tenant, 'env': self.env})
+            LOG.info(_("finish to initialize sherlock publisher"))
+            subprocess.call(
+                ['ceilometer-sherlock-request', '--host', self.host, '--port', str(self.port), '--tenant', self.tenant,
+                 '--env', self.env, '--app_svc', self.app_svc, '--profile', self.profile, '--event',
+                 json.dumps(sherlock_event_list)])
