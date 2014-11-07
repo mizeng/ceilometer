@@ -73,7 +73,6 @@ class SherlockClient(object):
         self.profile = sherlock_config.profile
         self.maxsize = sherlock_config.maxsize
         self.log_level = sherlock_config.log_level
-        self.thread_pool = Pool(sherlock_config.thread_num)
         infra.ll.set_log_level(self.log_level)
         self.frontier = infra.contrib.frontier.Frontier(host=self.host, port=self.port,
                                                             tenant=self.tenant,
