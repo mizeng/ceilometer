@@ -7,9 +7,10 @@ from ceilometer.openstack.common import network_utils
 from ceilometer import sample
 from ceilometer import publisher
 import infra
+import eventlet
 
 COUNTER_SOURCE = 'testsource'
-#eventlet.monkey_patch(socket=True, select=True, thread=True)
+eventlet.monkey_patch(socket=True, select=True, thread=True)
 
 
 class TestSherlockPublisher(test.BaseTestCase):
@@ -118,11 +119,6 @@ class TestSherlockPublisher(test.BaseTestCase):
         start_time = datetime.datetime.now()
         publisher_1.publish_samples(None, self.test_data)
         print "consumed time: {time}".format(time = datetime.datetime.now() - start_time)
-        publisher_2 = sherlock.SherlockPublisher(network_utils.urlsplit(
-            'sherlock://sherlock-ftr-qa.stratus.phx.qa.ebay.com?tenant=pp&env=qa&app_svc=PyInfra&profile=PythonInfraDev'));
-        self.assertIsNot(publisher_2.get_frontier(), publisher_1.get_frontier())
-        self.assertEqual(publisher_1.get_frontier(), publisher_1.get_frontier())
-        self.assertEqual(publisher_2.get_frontier(), publisher_2.get_frontier())
 
     def test_sherlock_prod_with_single_instance(self):
         publisher = sherlock.SherlockPublisher(network_utils.urlsplit(

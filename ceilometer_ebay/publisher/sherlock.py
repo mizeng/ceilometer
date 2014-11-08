@@ -12,7 +12,7 @@ from ceilometer import publisher
 from ceilometer.publisher import utils
 from ceilometer import sample
 from ceilometer.openstack.common import network_utils
-
+import gevent
 
 LOG = log.getLogger(__name__)
 
@@ -94,21 +94,11 @@ class SherlockPublisher(publisher.PublisherBase):
 
         return dimension_dict, metrics_list
 
-    def get_frontier(self):
-        import infra
-        import infra.ll
-        import infra.contrib.frontier
-
-        if self.frontier is None:
-            infra.ll.set_log_level(self.log_level)
-            self.frontier = infra.contrib.frontier.Frontier(host=self.host, port=self.port,
-                                                            tenant=self.tenant,
-                                                            env=self.env,
-                                                            app_svc=self.app_svc,
-                                                            profile=self.profile, maxsize=self.maxsize,
-                                                            timeout=self.timeout)
-            LOG.info(_("finish to initialize sherlock publisher"))
-        return self.frontier
+    def run_sub_process(self, sherlock_event_list):
+        subprocess.call(
+            ['ceilometer-sherlock-request', '--host', self.host, '--port', str(self.port), '--tenant', self.tenant,
+             '--env', self.env, '--app_svc', self.app_svc, '--profile', self.profile, '--event',
+             json.dumps(sherlock_event_list)])
 
     def publish_samples(self, context, samples):
         """Send a metering message for publishing
@@ -116,20 +106,6 @@ class SherlockPublisher(publisher.PublisherBase):
         :param context: Execution context from the service or RPC call
         :param samples: Samples from pipeline after transformation
         """
-
-        def _send_sherlock_metrics(sherlock_event):
-            status = True
-            frontier = self.get_frontier()
-            try:
-                frontier.send(dimension_list=sherlock_event['dimension_list'],
-                              metric_list=sherlock_event['metric_list'])
-
-            except Exception as e:
-                LOG.error(_("Unable to send sample over sherlock"))
-                LOG.exception(e)
-                status = False
-            return status, sherlock_event['msg']
-
         sherlock_event_list = list()
         for meter_sample in samples:
             msg = utils.meter_message_from_counter(
@@ -139,8 +115,5 @@ class SherlockPublisher(publisher.PublisherBase):
             if metric_list and len(metric_list) > 0:
                 sherlock_event_list.append({'msg': msg, 'dimension_list': dimension_list, 'metric_list': metric_list})
         if len(sherlock_event_list) > 0:
-            LOG.info(_("finish to initialize sherlock publisher"))
-            subprocess.call(
-                ['ceilometer-sherlock-request', '--host', self.host, '--port', str(self.port), '--tenant', self.tenant,
-                 '--env', self.env, '--app_svc', self.app_svc, '--profile', self.profile, '--event',
-                 json.dumps(sherlock_event_list)])
+            gevent.joinall([gevent.spawn(self.run_sub_process, sherlock_event_list)],
+                           len(sherlock_event_list) * self.timeout)

@@ -14,10 +14,10 @@ import infra.ll
 import infra.contrib.frontier
 
 
-
 LOG = log.getLogger(__name__)
 
 sherlock_config = ConfigOpts()
+infra.reset()
 
 
 class SherlockClient(object):
@@ -74,14 +74,14 @@ class SherlockClient(object):
         self.maxsize = sherlock_config.maxsize
         self.log_level = sherlock_config.log_level
         infra.ll.set_log_level(self.log_level)
-        #infra.ll.use_the_file(log._get_log_file_path())
-        infra.ll.use_the_file('ceilometer-sherlock-request.log')
+        # infra.ll.use_the_file(log._get_log_file_path())
+        #infra.ll.use_the_file('ceilometer-sherlock-request.log')
         self.frontier = infra.contrib.frontier.Frontier(host=self.host, port=self.port,
-                                                            tenant=self.tenant,
-                                                            env=self.env,
-                                                            app_svc=self.app_svc,
-                                                            profile=self.profile, maxsize=self.maxsize,
-                                                            timeout=self.timeout)
+                                                        tenant=self.tenant,
+                                                        env=self.env,
+                                                        app_svc=self.app_svc,
+                                                        profile=self.profile, maxsize=self.maxsize,
+                                                        timeout=self.timeout)
         LOG.info(_("finish to initialize sherlock publisher"))
         self.sherlock_event_list = json.loads(sherlock_config.event)
 
@@ -89,18 +89,22 @@ class SherlockClient(object):
         def _send_sherlock_metrics(sherlock_event):
             try:
                 self.frontier.send(dimension_list=sherlock_event['dimension_list'],
-                              metric_list=sherlock_event['metric_list'])
+                                   metric_list=sherlock_event['metric_list'])
                 LOG.info(_(
-                        "succeed publishing sample message over sherlock. details: [message: %(msg)s tenant: %(tenant)s env: %(env)s  ] ") % {
-                                 'msg': sherlock_event['msg'], 'tenant': self.tenant, 'env': self.env})
+                    "succeed trigger sample message over sherlock. details: [dimension: %(dimension)s metrics: %(metrics)s tenant: %(tenant)s env: %(env)s  ] ") % {
+                             'dimension': sherlock_event['dimension_list'], 'metrics': sherlock_event['metric_list'],
+                             'tenant': self.tenant, 'env': self.env})
             except Exception as e:
-                LOG.error(_("Unable to send sample over sherlock"))
-                LOG.exception(e)
                 LOG.info(_(
-                        "failed to publish sample message over sherlock. details: [message: %(msg)s tenant: %(tenant)s env: %(env)s  ] ") % {
-                                 'msg': sherlock_event['msg'], 'tenant': self.tenant, 'env': self.env})
-
+                    "fail to trigger sample message over sherlock. details: [dimension: %(dimension)s metrics: %(metrics)s tenant: %(tenant)s env: %(env)s  ] ") % {
+                             'dimension': sherlock_event['dimension_list'], 'metrics': sherlock_event['metric_list'],
+                             'tenant': self.tenant, 'env': self.env})
+                LOG.exception(e)
 
         if len(self.sherlock_event_list) > 0:
-            event_task_list = [infra.async.spawn(_send_sherlock_metrics, sherlock_event) for sherlock_event in self.sherlock_event_list]
+            event_task_list = [infra.async.spawn(_send_sherlock_metrics, sherlock_event) for sherlock_event in
+                               self.sherlock_event_list]
             infra.async.gevent.joinall(event_task_list)
+            while not self.frontier._wq.empty():
+                infra.async.sleep(0.1)
+            LOG.info(_("finish sending sample message over sherlock."))
