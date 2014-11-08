@@ -18,7 +18,7 @@ LOG = log.getLogger(__name__)
 
 sherlock_config = ConfigOpts()
 infra.reset()
-
+infra.ll.use_the_file(log._get_log_file_path())
 
 class SherlockClient(object):
     def __init__(self):
@@ -74,8 +74,7 @@ class SherlockClient(object):
         self.maxsize = sherlock_config.maxsize
         self.log_level = sherlock_config.log_level
         infra.ll.set_log_level(self.log_level)
-        # infra.ll.use_the_file(log._get_log_file_path())
-        #infra.ll.use_the_file('ceilometer-sherlock-request.log')
+
         self.frontier = infra.contrib.frontier.Frontier(host=self.host, port=self.port,
                                                         tenant=self.tenant,
                                                         env=self.env,
