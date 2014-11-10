@@ -103,7 +103,8 @@ class SherlockClient(object):
         if len(self.sherlock_event_list) > 0:
             event_task_list = [infra.async.spawn(_send_sherlock_metrics, sherlock_event) for sherlock_event in
                                self.sherlock_event_list]
+            self.frontier.writes_done.wait()
             infra.async.gevent.joinall(event_task_list)
-            while not self.frontier._wq.empty():
-                infra.async.sleep(0.1)
+            # while not self.frontier._wq.empty():
+            #     infra.async.sleep(0.1)
             LOG.info(_("finish sending sample message over sherlock."))
