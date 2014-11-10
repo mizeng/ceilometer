@@ -51,7 +51,7 @@ class SherlockPublisher(publisher.PublisherBase):
                 self.maxsize = int(params.get('maxsize', [10000])[0])
                 self.log_level = int(params.get('log_level', [2])[0])
                 self.timeout = float(params.get('timeout', [30.0])[0])
-                self.thread_num = float(params.get('thread_num', [10])[0])
+                self.thread_num = int(params.get('thread_num', [10])[0])
             except ValueError:
                 LOG.error(_(
                     "sherlock tenant, env,app_svc and profile's data type should be string. "
@@ -97,8 +97,9 @@ class SherlockPublisher(publisher.PublisherBase):
     def run_sub_process(self, sherlock_event_list):
         subprocess.call(
             ['ceilometer-sherlock-request', '--host', self.host, '--port', str(self.port), '--tenant', self.tenant,
-             '--env', self.env, '--app_svc', self.app_svc, '--profile', self.profile, '--event',
-             json.dumps(sherlock_event_list)])
+             '--env', self.env, '--app_svc', self.app_svc, '--profile', self.profile, '--maxsize', str(self.maxsize),
+             '--log_level', str(self.log_level), '--timeout', str(self.timeout), '--thread_num', str(self.thread_num),
+             '--event',json.dumps(sherlock_event_list)])
 
     def publish_samples(self, context, samples):
         """Send a metering message for publishing
