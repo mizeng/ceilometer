@@ -116,5 +116,11 @@ class SherlockPublisher(publisher.PublisherBase):
             if metric_list and len(metric_list) > 0:
                 sherlock_event_list.append({'msg': msg, 'dimension_list': dimension_list, 'metric_list': metric_list})
         if len(sherlock_event_list) > 0:
+            """
+                Infra is internal maintained gEvent based. Eventlet's monkey patch is conflict with them.
+                However, our ceilometer project cli by default to enable monkey patch to hack socket & thread.
+                To make them co-exist, we have to isolate infra code/its gEvent into separate process.
+                For details, please check https://github.paypal.com/Python/PythonInfrastructure/issues/211
+             """
             gevent.joinall([gevent.spawn(self.run_sub_process, sherlock_event_list)],
                            len(sherlock_event_list) * self.timeout)
