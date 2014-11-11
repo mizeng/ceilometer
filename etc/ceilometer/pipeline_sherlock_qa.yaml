@@ -35,7 +35,7 @@ sinks:
                     type: "gauge"
                     scale: "100.0 / (10**9 * (resource_metadata.cpu_number or 1))"
       publishers:
-          - sherlock://sherlock-ftr-qa.stratus.phx.qa.ebay.com:80?tenant=mp&env=qa&app_svc=c3-metrics&profile=c3-metrics&maxsize=10000&timeout=30.0&log_level=2
+          - sherlock://sherlock-ftr-qa.stratus.phx.qa.ebay.com:80?tenant=pp&env=qa&app_svc=PyInfra&profile=PythonInfraDev&maxsize=10000&timeout=30.0&log_level=2
     - name: disk_sink
       transformers:
           - name: "rate_of_change"
@@ -50,7 +50,7 @@ sinks:
                         unit: "\\1/s"
                     type: "gauge"
       publishers:
-          - sherlock://sherlock-ftr-qa.stratus.phx.qa.ebay.com80?tenant=mp&env=qa&app_svc=c3-metrics&profile=c3-metrics&maxsize=10000&timeout=30.0&log_level=2
+          - sherlock://sherlock-ftr-qa.stratus.phx.qa.ebay.com80?tenant=pp&env=qa&app_svc=PyInfra&profile=PythonInfraDev&maxsize=10000&timeout=30.0&log_level=2
     - name: network_sink
       transformers:
           - name: "rate_of_change"
@@ -65,4 +65,4 @@ sinks:
                         unit: "\\1/s"
                     type: "gauge"
       publishers:
-          - sherlock://sherlock-ftr-qa.stratus.phx.qa.ebay.com:80?tenant=mp&env=qa&app_svc=c3-metrics&profile=c3-metrics&maxsize=10000&timeout=30.0&log_level=2
+          - sherlock://sherlock-ftr-qa.stratus.phx.qa.ebay.com:80?tenant=pp&env=qa&app_svc=PyInfra&profile=PythonInfraDev&maxsize=10000&timeout=30.0&log_level=2
